@@ -98,14 +98,19 @@ class MeController {
 
     async savePost(req: IReqAuth, res: Response, next: NextFunction) {
         try {
-            const post = await Post.findOne({ _id: req.body.post });
+            const post = await Post.findOne({ _id: req.body.post }).populate({
+                path: 'owner',
+                select: '_id name account image role',
+            });
             if (!post)
                 return res.status(404).json({ message: 'Post not found.' });
 
             const userService = new UserService(req.user?._id);
             await userService.savePost(req.body.post);
 
-            return res.status(200).json({ message: 'Save post successfully' });
+            return res
+                .status(200)
+                .json({ data: post, message: 'Save post successfully' });
         } catch (error) {
             console.log(error);
             return next(new ApiError());
@@ -114,7 +119,10 @@ class MeController {
 
     async removeSavedPost(req: IReqAuth, res: Response, next: NextFunction) {
         try {
-            const post = await Post.findOne({ _id: req.body.post });
+            const post = await Post.findOne({ _id: req.body.post }).populate({
+                path: 'owner',
+                select: '_id name account image role',
+            });
             if (!post)
                 return res.status(404).json({ message: 'Post not found.' });
 
@@ -123,7 +131,10 @@ class MeController {
 
             return res
                 .status(200)
-                .json({ message: 'Remove saved post successfully' });
+                .json({
+                    data: post,
+                    message: 'Remove saved post successfully',
+                });
         } catch (error) {
             console.log(error);
             return next(new ApiError());
@@ -153,9 +164,12 @@ class MeController {
                 return res.status(404).json({ message: 'Post not found.' });
 
             const userService = new UserService(req.user?._id);
-            await userService.likePost(req.body.post);
+            const updated_posts = await userService.likePost(req.body.post);
 
-            return res.status(200).json({ message: 'Like post successfully' });
+            return res.status(200).json({
+                data: updated_posts,
+                message: 'Like post successfully',
+            });
         } catch (error) {
             console.log(error);
             return next(new ApiError());
@@ -169,11 +183,12 @@ class MeController {
                 return res.status(404).json({ message: 'Post not found.' });
 
             const userService = new UserService(req.user?._id);
-            await userService.unlikePost(req.body.post);
+            const updated_post = await userService.unlikePost(req.body.post);
 
-            return res
-                .status(200)
-                .json({ message: 'Unlike post successfully' });
+            return res.status(200).json({
+                data: updated_post,
+                message: 'Unlike post successfully',
+            });
         } catch (error) {
             console.log(error);
             return next(new ApiError());

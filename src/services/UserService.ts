@@ -163,6 +163,9 @@ class UserService {
         for (let i = 0; i < savedPostsLeng; ++i) {
             const post = await Post.findOne({
                 _id: user?.saved_posts[i].post_id,
+            }).populate({
+                path: 'owner',
+                select: '_id name account image role',
             });
             postsArray.push(post);
         }
@@ -212,7 +215,15 @@ class UserService {
         }
 
         await user?.save();
+
+        await post?.populate({
+            path: 'owner',
+            select: '_id name account image role',
+        });
+
         await post?.save();
+
+        return post;
     }
 
     async unlikePost(postId: string) {
@@ -220,10 +231,26 @@ class UserService {
             { _id: this.id },
             { $pull: { liked_posts: { post_id: postId } } }
         );
-        await Post.updateOne(
+        // const post = await Post.updateOne(
+        //     { _id: postId },
+        //     { $pull: { likes: { user: this.id } } },
+        //     { new: true }
+        // );
+
+        const post = await Post.findOneAndUpdate(
             { _id: postId },
-            { $pull: { likes: { user: this.id } } }
+            { $pull: { likes: { user: this.id } } },
+            { new: true }
         );
+
+        await post?.populate({
+            path: 'owner',
+            select: '_id image name account role',
+        });
+
+        await post?.save();
+
+        return post;
     }
 
     async likeComment(commentId: string) {
