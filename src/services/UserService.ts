@@ -266,14 +266,34 @@ class UserService {
             });
         }
 
+        await comment?.populate({
+            path: 'owner',
+            select: '_id image name account role',
+        });
         await comment?.save();
+        return comment;
     }
 
     async unlikeComment(commentId: string) {
-        await Comment.updateOne(
-            { _id: commentId },
-            { $pull: { likes: { user: this.id } } }
-        );
+        // const comment = await Comment.updateOne(
+        //     { _id: commentId },
+        //     { $pull: { likes: { user: this.id } } },
+        //     { new: true }
+        // );
+
+        const comment = await Comment.findOneAndUpdate(
+            {
+                _id: commentId,
+            },
+            {
+                $pull: { likes: { user: this.id } },
+            },
+            {
+                new: true,
+            }
+        ).populate({ path: 'owner', select: '_id image name account role' });
+
+        return comment;
     }
 
     async checkLikedPost(postId: string) {

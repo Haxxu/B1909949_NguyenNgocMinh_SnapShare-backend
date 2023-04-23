@@ -60,9 +60,12 @@ class CommentController {
                 });
             }
 
-            await CommentService.deleteCommentById(req.params.id);
+            const deleted_comment = await CommentService.deleteCommentById(
+                req.params.id
+            );
 
             return res.status(200).json({
+                data: deleted_comment,
                 message: 'Delete comment successfully',
             });
         } catch (error) {

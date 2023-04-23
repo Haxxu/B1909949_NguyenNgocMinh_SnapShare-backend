@@ -36,11 +36,18 @@ class PostService {
     }
 
     async update(payload: IPostUpdatePayload) {
-        return await Post.findOneAndUpdate(
+        const post = await Post.findOneAndUpdate(
             { _id: this.id },
             { $set: payload },
             { new: true }
         );
+        await post?.populate({
+            path: 'owner',
+            select: '_id image name account role',
+        });
+
+        await post?.save();
+        return post;
     }
 
     static async getPostsByTags(
@@ -51,6 +58,7 @@ class PostService {
         interface IType {
             random?: any[];
             following?: any[];
+            myPosts?: any[];
         }
         const object: IType = {};
         if (tags.includes('random')) {
@@ -96,6 +104,15 @@ class PostService {
             });
 
             object.following = [...posts];
+        }
+
+        if (tags.includes('myPosts')) {
+            const posts = await Post.find({ owner: userId }).populate({
+                path: 'owner',
+                select: '_id name account image role',
+            });
+
+            object.myPosts = posts;
         }
 
         return object;

@@ -129,12 +129,10 @@ class MeController {
             const userService = new UserService(req.user?._id);
             await userService.removeSavedPost(req.body.post);
 
-            return res
-                .status(200)
-                .json({
-                    data: post,
-                    message: 'Remove saved post successfully',
-                });
+            return res.status(200).json({
+                data: post,
+                message: 'Remove saved post successfully',
+            });
         } catch (error) {
             console.log(error);
             return next(new ApiError());
@@ -218,11 +216,14 @@ class MeController {
                 return res.status(404).json({ message: 'Comment not found.' });
 
             const userService = new UserService(req.user?._id);
-            await userService.likeComment(req.body.comment);
+            const updated_comment = await userService.likeComment(
+                req.body.comment
+            );
 
-            return res
-                .status(200)
-                .json({ message: 'Like comment successfully' });
+            return res.status(200).json({
+                data: updated_comment,
+                message: 'Like comment successfully',
+            });
         } catch (error) {
             console.log(error);
             return next(new ApiError());
@@ -236,11 +237,16 @@ class MeController {
                 return res.status(404).json({ message: 'Comment not found.' });
 
             const userService = new UserService(req.user?._id);
-            await userService.unlikeComment(req.body.comment);
+            const updated_comment = await userService.unlikeComment(
+                req.body.comment
+            );
 
             return res
                 .status(200)
-                .json({ message: 'Unlike comment successfully' });
+                .json({
+                    data: updated_comment,
+                    message: 'Unlike comment successfully',
+                });
         } catch (error) {
             console.log(error);
             return next(new ApiError());

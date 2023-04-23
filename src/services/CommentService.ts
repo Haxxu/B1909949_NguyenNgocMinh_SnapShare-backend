@@ -18,6 +18,11 @@ class CommentService {
     static async createNewCommentInPost(payload: ICommentPayload) {
         const newComment = await new Comment(payload).save();
 
+        await newComment.populate({
+            path: 'owner',
+            select: '_id image name account role',
+        });
+
         newComment.__v = undefined;
         return newComment;
     }
@@ -25,19 +30,21 @@ class CommentService {
     static async getCommentsByPostId(postId: string) {
         const comments = await Comment.find({ post: postId })
             .sort({ createdAt: 'desc' })
-            .select('-__v');
-        // .populate([
-        //     {
-        //         path: 'owner',
-        //         select: '-password -__v -role -saved_posts -liked_posts',
-        //     },
-        // ]);
+            .select('-__v')
+            .populate([
+                {
+                    path: 'owner',
+                    select: '_id name image account role',
+                },
+            ]);
 
         return comments;
     }
 
     static async deleteCommentById(commentId: string) {
-        await Comment.deleteOne({ _id: commentId });
+        const comment = await Comment.findOneAndDelete({ _id: commentId });
+
+        return comment;
     }
 }
 
