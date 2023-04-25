@@ -139,13 +139,14 @@ class UserService {
 
     async getPosts() {
         let postsArray = [];
-        const posts = await Post.find({ owner: this.id }).sort({
-            createdAt: -1,
-        });
-        // .populate({
-        //     path: 'owner',
-        //     select: '-password -__v -saved_posts -liked_posts -role',
-        // });
+        const posts = await Post.find({ owner: this.id })
+            .sort({
+                createdAt: -1,
+            })
+            .populate({
+                path: 'owner',
+                select: '_id name image role account',
+            });
         let postsLen = posts.length;
         for (let i = 0; i < postsLen; ++i) {
             postsArray.push(posts[i]);

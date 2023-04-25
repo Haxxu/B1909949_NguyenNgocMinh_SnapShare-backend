@@ -5,6 +5,7 @@ import ApiError from '../utils/ApiError';
 import UserService from '../services/UserService';
 import Post from '../models/Post';
 import Comment from '../models/Comment';
+import User from '../models/User';
 
 class MeController {
     async checkFollowUser(req: IReqAuth, res: Response, next: NextFunction) {
@@ -35,9 +36,13 @@ class MeController {
             const userService = new UserService(req.user?._id);
             await userService.follow(follow_user._id.toString());
 
+            const user = await User.findOne({ _id: req.body.user }).select(
+                '-__v -saved_posts -liked_posts -password'
+            );
+
             return res
                 .status(200)
-                .json({ message: 'Follow user successfully' });
+                .json({ data: user, message: 'Follow user successfully' });
         } catch (error) {
             console.log(error);
             return next(new ApiError());
@@ -56,9 +61,13 @@ class MeController {
             const userService = new UserService(req.user?._id);
             await userService.unfollow(unfollow_user._id.toString());
 
+            const user = await User.findOne({ _id: req.body.user }).select(
+                '-__v -saved_posts -liked_posts -password'
+            );
+
             return res
                 .status(200)
-                .json({ message: 'Unfollow user successfully' });
+                .json({ data: user, message: 'Unfollow user successfully' });
         } catch (error) {
             console.log(error);
             return next(new ApiError());
@@ -241,12 +250,10 @@ class MeController {
                 req.body.comment
             );
 
-            return res
-                .status(200)
-                .json({
-                    data: updated_comment,
-                    message: 'Unlike comment successfully',
-                });
+            return res.status(200).json({
+                data: updated_comment,
+                message: 'Unlike comment successfully',
+            });
         } catch (error) {
             console.log(error);
             return next(new ApiError());
