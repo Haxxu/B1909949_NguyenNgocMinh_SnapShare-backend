@@ -42,7 +42,7 @@ class AuthController {
 
             const active_token = generateActiveToken({ newUser });
 
-            const url = `${process.env.CLIENT_URL}/active/${active_token}`;
+            const url = `${process.env.CLIENT_URL}/active?token=${active_token}`;
 
             if (validateEmail(req.body.account)) {
                 sendMail(req.body.account, url, 'Verify your email address');
